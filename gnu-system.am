@@ -98,6 +98,7 @@ GNU_SYSTEM_MODULES =				\
   gnu/packages/file.scm				\
   gnu/packages/firmware.scm			\
   gnu/packages/fish.scm				\
+  gnu/packages/flash.scm			\
   gnu/packages/flashing-tools.scm		\
   gnu/packages/flex.scm				\
   gnu/packages/fltk.scm				\
