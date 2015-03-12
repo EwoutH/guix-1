@@ -185,6 +185,7 @@ GNU_SYSTEM_MODULES =				\
   %D%/packages/gkrellm.scm			\
   %D%/packages/gl.scm				\
   %D%/packages/glib.scm				\
+  %D%/packages/gnash.scm			\
   %D%/packages/gnome.scm			\
   %D%/packages/gnu-doc.scm			\
   %D%/packages/gnucash.scm			\
