@@ -20,8 +20,10 @@
 (define-module (gnu packages xml)
   #:use-module (gnu packages)
   #:use-module (gnu packages compression)
+  #:use-module (gnu packages glib)
   #:use-module (gnu packages gnupg)
   #:use-module (gnu packages perl)
+  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
   #:use-module (gnu packages web)
   #:use-module ((guix licenses) #:prefix license:)
@@ -276,6 +278,31 @@ that conforms to the API of the Document Object Model.")
      `(("util-linux" ,util-linux)                 ; for 'getopt'
        ("libxml2" ,libxml2)                       ; for 'xmllint'
        ("libxslt" ,libxslt)))                     ; for 'xsltproc'
+    (home-page "http://cyberelk.net/tim/software/xmlto/")
+    (synopsis "Front-end to an XSL toolchain")
+    (description
+     "Xmlto is a front-end to an XSL toolchain.  It chooses an appropriate
+stylesheet for the conversion you want and applies it using an external
+XSL-T processor.  It also performs any necessary post-processing.")
+    (license license:gpl2+)))
+
+(define-public libxmlpp
+  (package
+    (name "libxmlpp")
+    (version "2.38.0")
+    (source
+     (origin
+      (method url-fetch)
+      (uri (string-append "http://ftp.gnome.org/pub/GNOME/sources/libxml++/"
+                          version "/libxml++-" version ".tar.xz"))
+      (sha256
+       (base32
+        "0ihk7fprpshs0gp38x2m5jhvrph3iwr0wy1h1qqvh3rjblzv162n"))))
+    (build-system gnu-build-system)
+    (native-inputs `(("pkg-config" ,pkg-config)))
+    (inputs
+     `(("glib" ,glib)
+       ("libxml2" ,libxml2)))
     (home-page "http://cyberelk.net/tim/software/xmlto/")
     (synopsis "Front-end to an XSL toolchain")
     (description
