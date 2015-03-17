@@ -343,3 +343,25 @@ standards.")
 software, which does not recommend non-free plugins and addons.  It also
 features built-in privacy-protecting features.")
     (license license:mpl2.0))) ; and others, see toolkit/content/license.html
+
+(define-public npapi-sdk
+  (package
+    (name "npapi-sdk")
+    (version "0.27.2")
+    (source (origin
+              (method url-fetch)
+              (uri
+               (string-append
+                "https://bitbucket.org/mgorny/npapi-sdk/downloads/npapi-sdk-"
+                version ".tar.bz2"))
+              (sha256
+               (base32 "0xxfcsjmmgbbyl9zwpzdshbx27grj5fnzjfmldmm9apws2yk9gq1"))))
+    (build-system gnu-build-system)
+    (home-page "https://code.google.com/p/npapi-sdk")
+    (synopsis "SDK for building browser plugins of Netscape type")
+    (description
+     "This package contains headers and example code for building Netscape
+type broswer plugins.  This is intended for building plugins supported by most
+of browsers like Icecat, Firefox and many WebKit based browsers.  Headers are
+kept outside the browser and are versioned separately on change.")
+    (license license:bsd-3)))
