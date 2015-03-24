@@ -22,25 +22,34 @@
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages bash)
   #:use-module (gnu packages boost)
+  #:use-module (gnu packages compression)
   #:use-module (gnu packages curl)
   #:use-module (gnu packages cyrus-sasl)
   #:use-module (gnu packages gettext)
+  #:use-module (gnu packages gl)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages gnupg)
   #:use-module (gnu packages gnuzilla)
   #:use-module (gnu packages graphics)
+  #:use-module (gnu packages gstreamer)
   #:use-module (gnu packages gtk)
   #:use-module (gnu packages image)
+  #:use-module (gnu packages llvm)
   #:use-module (gnu packages openssl)
+  #:use-module (gnu packages pcre)
   #:use-module (gnu packages perl)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages qt)
   #:use-module (gnu packages sdl)
   #:use-module (gnu packages video)
   #:use-module (gnu packages xiph)
+  #:use-module (gnu packages xml)
+  #:use-module (gnu packages yasm)
   #:use-module (gnu packages)
   #:use-module (guix packages)
+  #:use-module (guix download)
   #:use-module (guix git-download)
+  #:use-module (guix build-system cmake)
   #:use-module (guix build-system gnu))
 
 (define-public gnash
@@ -123,3 +132,44 @@
 of v8 and v9.  It is possible to configure Gnash to use several different
 audio or video backends, ensuring good performance.")
     (license l:gpl3+)))
+
+(define-public lightspark
+  (package
+    (name "lightspark")
+    (version "0.7.2")
+    (source
+     (origin
+      (method url-fetch)
+      (uri
+       (string-append
+        "https://github.com/lightspark/lightspark/archive/lightspark-"
+                          version ".tar.gz"))
+      (sha256
+       (base32
+        "09p36k3477nn9181vn6ni036bwyz9387393hyzhfsbh41k4ynnap"))))
+    (build-system cmake-build-system)
+    (native-inputs
+     `(("pkg-config" ,pkg-config)))
+    (inputs
+     `(("boost" ,boost)
+       ("cairo" ,cairo)
+       ("curl" ,curl)
+       ("ffmpeg" ,ffmpeg)
+       ("glew" ,glew)
+       ("libjpeg" ,libjpeg)
+       ("libxml2" ,libxml2)
+       ("libxmlpp" ,libxmlpp)
+       ("llvm" ,llvm)
+       ("mesa" ,mesa)
+       ("pcre" ,pcre)
+       ("yasm" ,yasm)
+       ("zlib" ,zlib)))
+    ;; libglew, librtmp
+    (arguments
+     `(#:configure-flags
+       (list (string-append "-DCMAKE_ASM-NASM_COMPILER="
+                            (assoc-ref %build-inputs "yasm") "/bin/yasm"))))
+    (home-page "https://github.com/lightspark/lightspark")
+    (synopsis "Open source implementation of flash")
+    (description "blah blah")
+    (license l:gpl3)))
