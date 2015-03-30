@@ -101,7 +101,9 @@
     (arguments
      `(#:configure-flags
        (list
-        "--enable-media=ffmpeg" "--disable-jemalloc"
+        "--enable-media=gst"
+;;        "--enable-media=ffmpeg"
+        "--disable-jemalloc"
         "--with-npapi-install=system"
         (string-append "--with-npapi-plugindir=" (assoc-ref %outputs "out")
                        "/lib/mozilla/plugins")
