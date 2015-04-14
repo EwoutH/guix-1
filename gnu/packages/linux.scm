@@ -1586,6 +1586,8 @@ time.")
               (sha256
                (base32
                 "1rv5ivg0l1w3nwzwdkqixm96h5bzg7ib4rr196ysb2lw42jmpjbv"))
+              (patches (list
+                        (search-patch "lvm2-2.02.106-pthread-pkgconfig.patch")))
               (modules '((guix build utils)))
               (snippet
                '(begin
@@ -1620,6 +1622,7 @@ time.")
                                               "/etc/lvm")
                                "--enable-udev_sync"
                                "--enable-udev_rules"
+                               "--enable-static_link"
 
                                ;; Make sure programs such as 'dmsetup' can
                                ;; find libdevmapper.so.
