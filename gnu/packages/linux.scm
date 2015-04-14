@@ -1605,6 +1605,7 @@ time.")
        ("procps" ,procps)))                       ;tests use 'pgrep'
     (inputs
      `(("udev" ,eudev)))
+    (outputs '("out" "static"))
     (arguments
      '(#:phases (alist-cons-after
                  'configure 'set-makefile-shell
@@ -1615,7 +1616,19 @@ time.")
 
                    ;; Replace /bin/sh with the right file name.
                    (patch-makefile-SHELL "make.tmpl"))
-                 %standard-phases)
+                 (alist-cons-after
+                  'install 'static-install-fix
+                  (lambda* (#:key outputs #:allow-other-keys)
+                    (let* ((out    (assoc-ref outputs "out"))
+                           (static (assoc-ref outputs "static"))
+                           (sbin   (string-append static "/sbin")))
+                      (mkdir-p sbin)
+                      (for-each
+                       (lambda (file)
+                         (rename-file (string-append out file)
+                                      (string-append static file)))
+                         '("/sbin/lvm.static" "/sbin/dmsetup.static"))))
+                  %standard-phases))
 
        #:configure-flags (list (string-append "--sysconfdir="
                                               (assoc-ref %outputs "out")
