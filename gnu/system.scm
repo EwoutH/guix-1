@@ -41,6 +41,7 @@
   #:use-module (gnu packages compression)
   #:use-module (gnu packages firmware)
   #:autoload   (gnu packages cryptsetup) (cryptsetup)
+  #:autoload   (gnu packages linux) (lvm2/static)
   #:use-module (gnu services)
   #:use-module (gnu services dmd)
   #:use-module (gnu services base)
@@ -86,7 +87,9 @@
             %base-packages
             %base-firmware
 
-            luks-device-mapping))
+            luks-device-mapping
+            lvm-mapping
+            lvm-mapping-used?))
 
 ;;; Commentary:
 ;;;
@@ -207,6 +210,27 @@ file."
   (mapped-device-kind
    (open open-luks-device)
    (close close-luks-device)))
+
+(define (logical-volume-group-activate source target)
+  #~(zero? (system* (string-append #$lvm2/static "/sbin/lvm.static")
+                         "vgchange" "--activate" "y" #$target)))
+
+(define (logical-volume-group-deactivate source target)
+  #~(zero? (system* (string-append #$lvm2/static "/sbin/lvm.static")
+                    "vgchange" "--activate" "n" #$target)))
+
+(define (lvm-mapping-used? devices)
+  (not
+   (null? (filter
+           (lambda (md)
+             (eq? (mapped-device-type md)
+                  lvm-mapping))
+           devices))))
+
+(define lvm-mapping
+  (mapped-device-kind
+   (open  logical-volume-group-activate)
+   (close logical-volume-group-deactivate)))
 
 (define (other-file-system-services os)
   "Return file system services for the file systems of OS that are not marked

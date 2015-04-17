@@ -25,6 +25,7 @@
                 #:select (%store-prefix))
   #:use-module ((guix derivations)
                 #:select (derivation->output-path))
+  #:use-module (gnu system)
   #:use-module (gnu packages cpio)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages linux)
@@ -212,6 +213,9 @@ loaded at boot time in the order in which they appear."
                   file-systems)
             (list e2fsck/static)
             '())
+      ,@(if (lvm-mapping-used? mapped-devices)
+            (list lvm2/static)
+            '())
       ,@(if volatile-root?
             (list unionfs-fuse/static)
             '())))
@@ -241,7 +245,19 @@ loaded at boot time in the order in which they appear."
 
          (boot-system #:mounts '#$(map file-system->spec file-systems)
                       #:pre-mount (lambda ()
-                                    (and #$@device-mapping-commands))
+                                    (and #$@device-mapping-commands
+                                         ;; If we activated any volume group, we
+                                         ;; need to ensure that device nodes are
+                                         ;; created.  Add code here to call it
+                                         ;; once for all activations.
+                                         (when (lvm-mapping-used? mapped-devices)
+                                             #~(zero?
+                                                (system* (string-append
+                                                          #$lvm2/static
+                                                          "/sbin/lvm.static")
+                                                         "vgscan"
+                                                         "--mknodes")))))
+
                       #:linux-modules '#$linux-modules
                       #:linux-module-directory '#$kodir
                       #:qemu-guest-networking? #$qemu-networking?
