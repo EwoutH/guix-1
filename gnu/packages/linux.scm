@@ -1656,6 +1656,33 @@ mapper.  Kernel components are part of Linux-libre.")
     ;; Command-line tools are GPLv2.
     (license (list gpl2 lgpl2.1))))
 
+(define-public lvm2/static
+  (package
+    (name "lvm2-static")
+    (version (package-version lvm2))
+    (build-system trivial-build-system)
+    (source #f)
+    (arguments
+     `(#:modules ((guix build utils))
+       #:builder
+       (begin
+         (use-modules (guix build utils))
+         (let ((source (string-append (assoc-ref %build-inputs "lvm2") "/sbin"))
+               (bin    (string-append (assoc-ref %outputs "out") "/sbin")))
+           (mkdir-p bin)
+           (for-each (lambda (file)
+                       (copy-file (string-append source "/" file)
+                                  (string-append bin "/" file)))
+                     '("lvm.static" "dmsetup.static"))))))
+
+     (native-inputs `(("lvm2" ,lvm2 "static")))
+     (synopsis "Statically-linked commands from lvm2")
+     (description
+      "This package provides statically-linked binaries dmsetup and lvm taken
+from lvm2 package.  It is meant to be used in initrds.")
+     (home-page (package-home-page lvm2))
+     (license (package-license lvm2))))
+
 (define-public wireless-tools
   (package
     (name "wireless-tools")
