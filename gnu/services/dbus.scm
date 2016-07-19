@@ -27,7 +27,8 @@
   #:use-module (guix records)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match)
-  #:export (dbus-root-service-type
+  #:export (dbus-configuration
+            dbus-root-service-type
             dbus-service))
 
 ;;;
