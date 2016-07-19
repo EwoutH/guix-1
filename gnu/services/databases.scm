@@ -27,8 +27,12 @@
   #:use-module (guix records)
   #:use-module (guix gexp)
   #:use-module (ice-9 match)
-  #:export (postgresql-service
+  #:export (postgresql-configuration
+            postgresql-service
+            postgresql-service-type
+
             mysql-service
+            mysql-service-type
             mysql-configuration))
 
 ;;; Commentary:
