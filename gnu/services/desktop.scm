@@ -45,18 +45,31 @@
   #:use-module (guix gexp)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match)
-  #:export (upower-service
+  #:export (upower-configuration
+            upower-service
+            upower-service-type
+            udisks-configuration
             udisks-service
+            udisks-service-type
             colord-service
             geoclue-application
+            geoclue-configuration
             %standard-geoclue-applications
             geoclue-service
+            geoclue-service-type
             bluetooth-service
+            polkit-configuration
             polkit-service
+            polkit-service-type
             elogind-configuration
             elogind-service
+            elogind-service-type
+            gnome-desktop-configuration
             gnome-desktop-service
+            gnome-desktop-service-type
+            xfce-desktop-configuration
             xfce-desktop-service
+            xfce-desktop-service-type
             %desktop-services))
 
 ;;; Commentary:
