@@ -24,7 +24,9 @@
   #:use-module (guix gexp)
   #:use-module (guix records)
   #:use-module (ice-9 match)
-  #:export (lirc-service))
+  #:export (lirc-configuration
+            lirc-service
+            lirc-service-type))
 
 ;;; Commentary:
 ;;;
