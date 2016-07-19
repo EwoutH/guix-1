@@ -27,7 +27,9 @@
   #:use-module (guix records)
   #:use-module (guix gexp)
   #:use-module (ice-9 match)
-  #:export (nginx-service))
+  #:export (nginx-configuration
+            nginx-service
+            nginx-service-type))
 
 ;;; Commentary:
 ;;;
