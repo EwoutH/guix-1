@@ -390,7 +390,7 @@ singular value problems.")
                           version "/gnuplot-" version ".tar.gz"))
       (sha256
        (base32
-        "08vpmhl85l48xcccx8jrkamalih2d6z9ppqpsppwii9y2l1p3297"))))
+        "07n3w12dkcxjnhsvsliaqnkhajhi818v6q8mkpmpbplbf92vh70m"))))
     (build-system gnu-build-system)
     (inputs `(("readline" ,readline)
               ("cairo" ,cairo)
