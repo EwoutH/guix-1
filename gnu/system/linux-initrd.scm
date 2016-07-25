@@ -137,6 +137,7 @@ MODULES and taken from LINUX."
                       qemu-networking?
                       (virtio? #t)
                       volatile-root?
+                      (extra-packages '())
                       (extra-modules '()))
   "Return a monadic derivation that builds a generic initrd, with kernel
 modules taken from LINUX.  FILE-SYSTEMS is a list of file-systems to be
@@ -207,7 +208,8 @@ loaded at boot time in the order in which they appear."
             '())
       ,@(if volatile-root?
             (list unionfs-fuse/static)
-            '())))
+            '())
+      ,@extra-packages))
 
   (define device-mapping-commands
     ;; List of gexps to open the mapped devices.
