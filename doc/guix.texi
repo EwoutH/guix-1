@@ -10238,7 +10238,7 @@ system declaration like this:
                  rest)))
 @end example
 
-In a similar way you can add programs to packed into initrd using
+In a similar way you can add programs to pack into initrd using
 @code{#:extra-packages}.
 
 The @code{base-initrd} procedure also handles common use cases that
@@ -10312,7 +10312,7 @@ loaded at boot time in the order in which they appear.
 
 Additional packages can be added through @var{extra-packages}. This is
 useful mostly for development and debugging purposes but it can also be
-used to extend set of commands available in case of interactive
+used to extend the set of commands available in case of interactive
 recovery.
 @end deffn
 
