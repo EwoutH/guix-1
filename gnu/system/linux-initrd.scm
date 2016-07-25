@@ -138,6 +138,7 @@ MODULES and taken from LINUX."
                       (virtio? #t)
                       volatile-root?
                       (extra-packages '())
+                      (linux-modules #f)
                       (extra-modules '()))
   "Return a monadic derivation that builds a generic initrd, with kernel
 modules taken from LINUX.  FILE-SYSTEMS is a list of file-systems to be
@@ -174,7 +175,7 @@ loaded at boot time in the order in which they appear."
     (lambda (fs)
       (string=? (file-system-type fs) type)))
 
-  (define linux-modules
+  (define default-linux-modules
     ;; Modules added to the initrd and loaded from the initrd.
     `("ahci"                                  ;for SATA controllers
       "usb-storage" "uas"                     ;for the installation image etc.
@@ -221,8 +222,13 @@ loaded at boot time in the order in which they appear."
              (open source target)))
          mapped-devices))
 
+  (define used-linux-modules
+    (if (equal? linux-modules #f)
+        default-linux-modules
+        linux-modules))
+
   (mlet %store-monad ((kodir (flat-linux-module-directory linux
-                                                          linux-modules)))
+                                                          used-linux-modules)))
     (expression->initrd
      (with-imported-modules (source-module-closure
                              '((gnu build linux-boot)
@@ -250,7 +256,7 @@ loaded at boot time in the order in which they appear."
            (boot-system #:mounts '#$(map file-system->spec file-systems)
                         #:pre-mount (lambda ()
                                       (and #$@device-mapping-commands))
-                        #:linux-modules '#$linux-modules
+                        #:linux-modules '#$used-linux-modules
                         #:linux-module-directory '#$kodir
                         #:qemu-guest-networking? #$qemu-networking?
                         #:volatile-root? '#$volatile-root?)))
