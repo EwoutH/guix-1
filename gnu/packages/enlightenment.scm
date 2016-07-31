@@ -235,6 +235,7 @@ The only supported now is VLC.")
        ("elementary" ,elementary)))
     (home-page "http://www.enlightenment.org")
     (synopsis "Powerful terminal emulator based on EFL")
+    (outputs '("out" "debug"))
     (description
      "Terminology is fast and feature rich terminal emulator.  It is solely
 based on Enlightenment Foundation Libraries.  It supports multiple tabs, UTF-8,
