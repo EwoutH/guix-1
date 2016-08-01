@@ -23,6 +23,12 @@
 (define-module (gnu packages telephony)
   #:use-module (gnu packages)
   #:use-module (gnu packages autotools)
+  #:use-module (gnu packages avahi)
+  #:use-module (gnu packages boost)
+  #:use-module (gnu packages cyrus-sasl)
+  #:use-module (gnu packages glib)
+  #:use-module (gnu packages gnome)
+  #:use-module (gnu packages gtk)
   #:use-module (gnu packages gnupg)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages pkg-config)
@@ -252,3 +258,37 @@ Voice-over-IP (VoIP) communications.")
       ;; covered under the 'GPL'.
       ;; The package as a whole is distributed under the LGPL 2.0.
       (license (list lgpl2.0 public-domain gpl2+)))))
+
+(define-public ekiga
+  (package
+    (name "ekiga")
+    (version "4.0.1")
+    (source
+     (origin
+         (method url-fetch)
+         (uri
+          (string-append
+           "http://ftp.gnome.org/pub/gnome/sources/" name "/4.0/" name "-"
+           version ".tar.xz"))
+         (sha256
+          (base32
+           "0fsakb6vyl6gxsxabkbvl3ng8y02pgb4b4vs0nx6bkwnjhf4jksz"))))
+      (build-system gnu-build-system)
+      (inputs
+       `(("boost" ,boost)
+         ("cyrus-sasl" ,cyrus-sasl)
+         ("dbus-glib" ,dbus-glib)
+         ("gconf" ,gconf)
+         ("gnome-doc-utils" ,gnome-doc-utils)
+         ("gnome-icon-theme" ,gnome-icon-theme)
+         ("gtk+" ,gtk+-2)
+         ("intltool" ,intltool)
+         ("avahi" ,avahi)
+         ("libnotify" ,libnotify)
+         ("pkg-config" ,pkg-config)
+         ))
+      (home-page "https://gitlab.savoirfairelinux.com/sflphone/libiax2")
+      (synopsis "VoIP client")
+      (description "VoIP client supporting SIP and H.323 protocols")
+      (license gpl2+)))
+
