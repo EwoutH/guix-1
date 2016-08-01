@@ -27,10 +27,14 @@
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix git-download)
+  #:use-module (guix build-system cmake)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
+  #:use-module (gnu packages)
+  #:use-module (gnu packages gl)
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages python)
+  #:use-module (gnu packages pth)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages autotools)
@@ -51,7 +55,8 @@
   #:use-module (gnu packages acl)
   #:use-module (gnu packages admin)
   #:use-module (gnu packages polkit)
-  #:use-module (gnu packages databases))
+  #:use-module (gnu packages databases)
+  #:use-module (gnu packages xdisorg))
 
 (define-public xdg-utils
   (package
@@ -625,3 +630,37 @@ different sorts of messages in different formats.")
 useful for both applications which need colour management and applications that
 wish to perform colour calibration.")
     (license license:lgpl2.1+)))
+
+(define-public wlc
+  (package
+    (name "wlc")
+    (version "0.0.4")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "https://github.com/Cloudef/" name "/releases/download/v"
+                    version "/" name "-" version ".tar.bz2"))
+              (sha256
+               (base32
+                "0pl1x0srvdyb0gj70031vras6smvz59jhvaw3czl6w8m7jx23rhn"))
+              (patches (search-patches "wlc-implement-wlc_view_get_pid.patch"))))
+    (build-system cmake-build-system)
+    (inputs
+     `(("libinput" ,libinput)
+       ("libx11" ,libx11)
+       ("libxkbcommon" ,libxkbcommon)
+       ("mesa" ,mesa)
+       ("pixman" ,pixman)
+       ("pkg-config" ,pkg-config)
+       ("pth" ,pth)
+       ("wayland" ,wayland)
+       ("xcb-util-image" ,xcb-util-image)
+       ("xcb-util-wm" ,xcb-util-wm)
+       ("xproto" ,xproto)
+       ("zlib" ,zlib)))
+    (synopsis "Wayland Compositor Library")
+    (home-page "https://github.com/Cloudef/wlc")
+    (description
+     "This is wayland compositor library used by several projects like sway,
+orbment or Guile-WM.")
+    (license license:x11)))
