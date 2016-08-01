@@ -36,6 +36,7 @@
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages python)
   #:use-module (gnu packages pth)
+  #:use-module (gnu packages pcre)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages autotools)
@@ -59,6 +60,7 @@
   #:use-module (gnu packages admin)
   #:use-module (gnu packages polkit)
   #:use-module (gnu packages databases)
+  #:use-module (gnu packages web)
   #:use-module (gnu packages xdisorg))
 
 (define-public xdg-utils
@@ -820,4 +822,46 @@ wish to perform colour calibration.")
     (description
      "This is wayland compositor library used by several projects like sway,
 orbment or Gram.")
+    (license license:x11)))
+
+(define-public sway
+  (package
+    (name "sway")
+    (version "0.9")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "https://github.com/SirCmpwn/" name "/archive/"
+                    version ".tar.gz"))
+              (sha256
+               (base32
+                "0bgli7scjlvbgas09dx5fnncgda41ssba6fzkw2vyk88pmdgx66w"))
+              (patches (list (search-patch "sway-debug.patch")))))
+    (build-system cmake-build-system)
+    (arguments
+     '(#:configure-flags '("-DVERBOSE=1")
+       #:tests? #f)) ; no 'check' target
+    (native-inputs
+     `(("gdk-pixbuf" ,gdk-pixbuf)
+       ("libxslt" ,libxslt)
+       ("pkg-config" ,pkg-config)
+       ("wayland" ,wayland)))
+    (inputs
+     `(("asciidoc" ,asciidoc)
+       ("cairo" ,cairo)
+       ("docbook-xml" ,docbook-xml)
+       ("docbook-xsl" ,docbook-xsl)
+       ("gdk-pixbuf" ,gdk-pixbuf)
+       ("json-c" ,json-c)
+       ("libinput" ,libinput)
+       ("libxkbcommon" ,libxkbcommon)
+       ("linux-pam" ,linux-pam)
+       ("pango" ,pango)
+       ("pcre" ,pcre)
+       ("wlc" ,wlc)))
+    (synopsis "Window manager for Wayland, compatible with i3")
+    (home-page "https://github.com/SirCmpwn/sway")
+    (description
+     "SirCmpwn's WAYland window manager is work-in-progress i3-compatible
+tiling window manager.")
     (license license:x11)))
