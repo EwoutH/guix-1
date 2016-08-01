@@ -123,6 +123,7 @@
                           (("/bin/sh") (which "bash"))))))))
     (home-page "http://www.enlightenment.org")
     (synopsis "Enlightenment Foundation Libraries")
+    (outputs '("out" "debug"))
     (description
      "Enlightenment Foundation Libraries is a set of libraries developed
 for Enlightenment.  Libraries covers data serialization, wide support for
