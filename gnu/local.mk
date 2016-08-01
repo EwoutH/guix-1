@@ -837,6 +837,7 @@ dist_patch_DATA =						\
   %D%/packages/patches/wicd-get-selected-profile-fix.patch	\
   %D%/packages/patches/wicd-urwid-1.3.patch			\
   %D%/packages/patches/wicd-wpa2-ttls.patch			\
+  %D%/packages/patches/wlc-implement-wlc_view_get_pid.patch	\
   %D%/packages/patches/wmctrl-64-fix.patch			\
   %D%/packages/patches/woff2-libbrotli.patch			\
   %D%/packages/patches/wordnet-CVE-2008-2149.patch			\

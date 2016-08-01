@@ -1,0 +1,170 @@
+implement wlc_view_get_pid which is required by current version of sway
+
+From 21e676de9f4b9b6ff65942f20fdc4f43125a82c9 Mon Sep 17 00:00:00 2001
+From: Zandr Martin <zandrmartin@gmail.com>
+Date: Sat, 30 Jul 2016 08:23:00 -0500
+Subject: [PATCH] implement wlc_view_get_pid()
+
+---
+ include/wlc/wlc.h           |  5 +++++
+ man/man3/wlc_view_get_pid.3 | 32 ++++++++++++++++++++++++++++++++
+ src/compositor/view.c       | 26 ++++++++++++++++++++++++++
+ src/compositor/view.h       |  3 +++
+ src/xwayland/xwm.c          |  1 +
+ 5 files changed, 67 insertions(+)
+ create mode 100644 man/man3/wlc_view_get_pid.3
+
+diff --git a/include/wlc/wlc.h b/include/wlc/wlc.h
+index 8d6628b..1d17085 100644
+--- a/include/wlc/wlc.h
++++ b/include/wlc/wlc.h
+@@ -8,6 +8,7 @@ extern "C" {
+ #include <wlc/defines.h>
+ #include <wlc/geometry.h>
+ #include <xkbcommon/xkbcommon-keysyms.h>
++#include <sys/types.h>
+ 
+ struct wlc_event_source;
+ 
+@@ -61,6 +62,7 @@ enum wlc_view_property_update_bit {
+    WLC_BIT_PROPERTY_TITLE = 1<<0,
+    WLC_BIT_PROPERTY_CLASS = 1<<1,
+    WLC_BIT_PROPERTY_APP_ID = 1<<2,
++   WLC_BIT_PROPERTY_PID = 1<<3,
+ };
+ 
+ /** wlc_view_set_geometry(); Edges in interface interface.view.request.resize function. */
+@@ -388,6 +390,9 @@ const char* wlc_view_get_class(wlc_handle view);
+ /** Get app id. (xdg-surface only) */
+ const char* wlc_view_get_app_id(wlc_handle view);
+ 
++/** Get pid. */
++pid_t wlc_view_get_pid(wlc_handle view);
++
+ /** --  Input API
+  * Very recent stuff, things may change.
+  * XXX: This api is dumb and assumes there is only single xkb state and keymap.
+diff --git a/man/man3/wlc_view_get_pid.3 b/man/man3/wlc_view_get_pid.3
+new file mode 100644
+index 0000000..ce42be2
+--- /dev/null
++++ b/man/man3/wlc_view_get_pid.3
+@@ -0,0 +1,32 @@
++.TH WLC_VIEW_GET_PID 3 2016-07-29 WLC "WLC Core API Functions"
++
++.SH NAME
++wlc_view_get_pid - get the process id for a given view
++
++.SH SYNOPSIS
++.B #include <wlc/wlc.h>
++
++.BI "pid_t wlc_view_get_pid(wlc_handle "view ");"
++
++.SS Wayland protocol requirements:
++.RS
++.BR wlc_view_get_pid ():
++xdg_shell
++.RE
++
++.SH DESCRIPTION
++.BR wlc_view_get_pid ()
++can be used to acquire the process id of a given
++.I view.
++
++.SH RETURN VALUE
++.BR wlc_view_get_pid ()
++returns the process id for
++.I view
++if it is available. Returns 0 (not a valid pid) if it is not. For X11
++views this requires the application set the __NET_WM_PID property.
++
++.SH ALSO SEE
++The XDG Shell protocol extension
++.UR http://cgit.freedesktop.org/wayland/weston/tree/protocol/xdg-shell.xml
++.UE
+diff --git a/src/compositor/view.c b/src/compositor/view.c
+index 54a8eb6..c0c867f 100644
+--- a/src/compositor/view.c
++++ b/src/compositor/view.c
+@@ -440,6 +440,16 @@ wlc_view_set_app_id_ptr(struct wlc_view *view, const char *app_id)
+ }
+ 
+ void
++wlc_view_set_pid_ptr(struct wlc_view *view, pid_t pid)
++{
++   if (!view || view->data.pid == pid)
++      return;
++
++   view->data.pid = pid;
++   WLC_INTERFACE_EMIT(view.properties_updated, convert_to_wlc_handle(view), WLC_BIT_PROPERTY_PID);
++}
++
++void
+ wlc_view_close_ptr(struct wlc_view *view)
+ {
+    if (!view)
+@@ -649,6 +659,22 @@ wlc_view_get_app_id(wlc_handle view)
+    return get_cstr(convert_from_wlc_handle(view, "view"), offsetof(struct wlc_view, data.app_id));
+ }
+ 
++WLC_API pid_t
++wlc_view_get_pid(wlc_handle handle)
++{
++   struct wlc_view *view;
++   if(!(view = convert_from_wlc_handle(handle, "view")))
++      return 0;
++
++   if (is_x11_view(view)) {
++      return view->data.pid;
++   } else {
++      pid_t pid;
++      wl_client_get_credentials(wlc_view_get_client_ptr(view), &pid, NULL, NULL);
++      return pid;
++   }
++}
++
+ void
+ wlc_view_release(struct wlc_view *view)
+ {
+diff --git a/src/compositor/view.h b/src/compositor/view.h
+index 23f8a2b..731b684 100644
+--- a/src/compositor/view.h
++++ b/src/compositor/view.h
+@@ -2,6 +2,7 @@
+ #define _WLC_VIEW_H_
+ 
+ #include <stdbool.h>
++#include <sys/types.h>
+ #include <wlc/geometry.h>
+ #include <wayland-util.h>
+ #include <chck/pool/pool.h>
+@@ -47,6 +48,7 @@ struct wlc_view {
+       struct chck_string app_id;
+       struct chck_string title;
+       struct chck_string _class;
++      pid_t pid;
+       enum wl_shell_surface_fullscreen_method fullscreen_mode;
+       bool minimized;
+    } data;
+@@ -99,5 +101,6 @@ void wlc_view_set_minimized_ptr(struct wlc_view *view, bool minimized);
+ void wlc_view_set_title_ptr(struct wlc_view *view, const char *title, size_t length);
+ void wlc_view_set_class_ptr(struct wlc_view *view, const char *class_, size_t length);
+ void wlc_view_set_app_id_ptr(struct wlc_view *view, const char *app_id);
++void wlc_view_set_pid_ptr(struct wlc_view *view, pid_t pid);
+ 
+ #endif /* _WLC_VIEW_H_ */
+diff --git a/src/xwayland/xwm.c b/src/xwayland/xwm.c
+index 0211bc2..1ee38ae 100644
+--- a/src/xwayland/xwm.c
++++ b/src/xwayland/xwm.c
+@@ -221,6 +221,7 @@ read_properties(struct wlc_xwm *xwm, struct wlc_x11_window *win, const xcb_atom_
+          wlc_dlog(WLC_DBG_XWM, "WM_TRANSIENT_FOR: %u", *xid);
+       } else if (props[i] == x11.atoms[NET_WM_PID] && reply->type == XCB_ATOM_CARDINAL) {
+          // PID
++         wlc_view_set_pid_ptr(view, *(pid_t *)xcb_get_property_value(reply));
+          wlc_dlog(WLC_DBG_XWM, "NET_WM_PID");
+       } else if (props[i] == x11.atoms[NET_WM_WINDOW_TYPE] && reply->type == XCB_ATOM_ATOM) {
+          // Window type
+-- 
+2.9.2
+
