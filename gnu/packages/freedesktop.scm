@@ -35,6 +35,7 @@
   #:use-module (gnu packages gnome)
   #:use-module (gnu packages python)
   #:use-module (gnu packages pth)
+  #:use-module (gnu packages pcre)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages autotools)
@@ -56,6 +57,7 @@
   #:use-module (gnu packages admin)
   #:use-module (gnu packages polkit)
   #:use-module (gnu packages databases)
+  #:use-module (gnu packages web)
   #:use-module (gnu packages xdisorg))
 
 (define-public xdg-utils
@@ -664,3 +666,39 @@ wish to perform colour calibration.")
      "This is wayland compositor library used by several projects like sway,
 orbment or Guile-WM.")
     (license license:x11)))
+
+(define-public sway
+  (package
+    (name "sway")
+    (version "0.9-rc3")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "https://github.com/SirCmpwn/" name "/archive/"
+                    version ".tar.gz"))
+              (sha256
+               (base32
+                "1hl6m3873vm8gpaq1y9bgdyx1cvla9qkpwz7m4fqxaz5swahmqx9"))))
+    (build-system cmake-build-system)
+    (native-inputs
+     `(("gdk-pixbuf" ,gdk-pixbuf)
+       ("libxslt" ,libxslt)
+       ("wayland" ,wayland)))
+    (inputs
+     `(("asciidoc" ,asciidoc)
+       ("cairo" ,cairo)
+       ("gdk-pixbuf" ,gdk-pixbuf)
+       ("json-c" ,json-c)
+       ("libinput" ,libinput)
+       ("libxkbcommon" ,libxkbcommon)
+       ("linux-pam" ,linux-pam)
+       ("pango" ,pango)
+       ("pcre" ,pcre)
+       ("pkg-config" ,pkg-config)
+       ("wlc" ,wlc)))
+    (synopsis "Window manager for Wayland, compatible with i3")
+    (home-page "https://github.com/Cloudef/wlc")
+    (description
+     "SirCmpwn's WAYland window manager is work-in-progress i3-compatible tiling window manager.")
+    (license license:x11)))
+  
