@@ -10238,6 +10238,9 @@ system declaration like this:
                  rest)))
 @end example
 
+In a similar way you can add programs to packed into initrd using
+@code{#:extra-packages}.
+
 The @code{base-initrd} procedure also handles common use cases that
 involves using the system as a QEMU guest, or as a ``live'' system with
 volatile root file system.
@@ -10288,7 +10291,7 @@ further.
 
 @deffn {Monadic Procedure} base-initrd @var{file-systems} @
        [#:qemu-networking? #f] [#:virtio? #t] [#:volatile-root? #f] @
-       [#:extra-modules '()] [#:mapped-devices '()]
+       [#:extra-packages '()] [#:extra-modules '()] [#:mapped-devices '()]
 Return a monadic derivation that builds a generic initrd.  @var{file-systems} is
 a list of file systems to be mounted by the initrd, possibly in addition to
 the root file system specified on the kernel command line via @code{--root}.
@@ -10306,6 +10309,11 @@ The initrd is automatically populated with all the kernel modules necessary
 for @var{file-systems} and for the given options.  However, additional kernel
 modules can be listed in @var{extra-modules}.  They will be added to the initrd, and
 loaded at boot time in the order in which they appear.
+
+Additional packages can be added through @var{extra-packages}. This is
+useful mostly for development and debugging purposes but it can also be
+used to extend set of commands available in case of interactive
+recovery.
 @end deffn
 
 Needless to say, the initrds we produce and use embed a
