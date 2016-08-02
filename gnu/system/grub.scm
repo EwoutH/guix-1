@@ -54,6 +54,9 @@
             menu-entry
             menu-entry?
 
+            foreign-menu-entry
+            foreign-menu-entry?
+
             grub-configuration-file))
 
 ;;; Commentary:
@@ -115,6 +118,16 @@
   (linux-arguments menu-entry-linux-arguments
                    (default '()))          ; list of string-valued gexps
   (initrd          menu-entry-initrd))     ; file name of the initrd as a gexp
+
+(define-record-type* <foreign-menu-entry>
+  foreign-menu-entry make-foreign-menu-entry
+  foreign-menu-entry?
+  (label           foreign-menu-entry-label)
+  (device          foreign-menu-entry-device (default ""))
+  (linux           foreign-menu-entry-linux)
+  (linux-arguments foreign-menu-entry-linux-arguments
+                   (default '()))                  ; list of string-valued gexps
+  (initrd          foreign-menu-entry-initrd))     ; file name of the initrd as a gexp
 
 
 ;;;
@@ -264,7 +277,16 @@ corresponding to old generations of the system."
                                     #~(string-append #$linux "/"
                                                      #$linux-image-name))
                 #$linux #$linux-image-name (string-join (list #$@arguments))
-                #$initrd))))
+                #$initrd))
+     (($ <foreign-menu-entry> label device linux arguments initrd)
+      #~(format port "menuentry ~s {
+  linux ~a ~a
+  initrd ~a
+}~%"
+                #$label
+                (string-append #$device #$linux)
+                (string-join (list #$@arguments))
+                (string-append #$device #$initrd)))))
 
   (mlet %store-monad ((sugar (eye-candy config store-fs system #~port)))
     (define builder
