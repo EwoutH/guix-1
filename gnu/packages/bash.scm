@@ -2,6 +2,7 @@
 ;;; Copyright © 2012, 2013, 2014, 2015 Ludovic Courtès <ludo@gnu.org>
 ;;; Copyright © 2014, 2015 Mark H Weaver <mhw@netris.org>
 ;;; Copyright © 2015 Leo Famulari <leo@famulari.name>
+;;; Copyright © 2016 Tomáš Čech <sleep_walker@gnu.org>
 ;;;
 ;;; This file is part of GNU Guix.
 ;;;
@@ -21,6 +22,7 @@
 (define-module (gnu packages bash)
   #:use-module (guix licenses)
   #:use-module (gnu packages)
+  #:use-module (gnu packages autotools)
   #:use-module (gnu packages ncurses)
   #:use-module (gnu packages readline)
   #:use-module (gnu packages bison)
@@ -275,43 +277,47 @@ without modification.")
 (define-public bash-completion
   (package
     (name "bash-completion")
-    (version "2.1")
+    (version "2.3")
     (source (origin
               (method url-fetch)
               (uri (string-append
-                    "http://bash-completion.alioth.debian.org/files/"
-                    "bash-completion-" version ".tar.bz2"))
+                    "https://github.com/scop/" name "/archive/" version
+                    ".tar.gz"))
               (sha256
                (base32
-                "0kxf8s5bw7y50x0ksb77d3kv0dwadixhybl818w27y6mlw26hq1b"))
+                "0aij7fmn6f7q3z6pbqn61h0b81ydl5iv19zhhj5cdfz3yvswwbyr"))
               (patches
                (search-patches "bash-completion-directories.patch"))))
     (build-system gnu-build-system)
-    (native-inputs `(("util-linux" ,util-linux)))
+    (native-inputs `(("util-linux" ,util-linux)
+                     ("autoconf" ,autoconf)
+                     ("automake" ,automake)))
     (arguments
-     `(#:phases (alist-cons-after
-                 'install 'remove-redundant-completions
-                 (lambda* (#:key inputs outputs #:allow-other-keys)
-                   ;; Util-linux comes with a bunch of completion files for
-                   ;; its own commands which are more sophisticated and
-                   ;; up-to-date than those of bash-completion.  Remove those
-                   ;; from bash-completion.
-                   (let* ((out         (assoc-ref outputs "out"))
-                          (util-linux  (assoc-ref inputs "util-linux"))
-                          (completions (string-append out
-                                                      "/share/bash-completion"
-                                                      "/completions"))
-                          (already     (find-files
-                                        (string-append
-                                         util-linux
-                                         "/etc/bash_completion.d"))))
-                     (with-directory-excursion completions
-                       (for-each (lambda (file)
-                                   (when (file-exists? file)
-                                     (delete-file file)))
-                                 (map basename already)))
-                     #t))
-                 %standard-phases)))
+     `(#:phases (modify-phases %standard-phases
+                  (add-after 'install 'remove-redundant-completions
+                    (lambda* (#:key inputs outputs #:allow-other-keys)
+                      ;; Util-linux comes with a bunch of completion files for
+                      ;; its own commands which are more sophisticated and
+                      ;; up-to-date than those of bash-completion.  Remove those
+                      ;; from bash-completion.
+                      (let* ((out         (assoc-ref outputs "out"))
+                             (util-linux  (assoc-ref inputs "util-linux"))
+                             (completions (string-append out
+                                                         "/share/bash-completion"
+                                                         "/completions"))
+                             (already     (find-files
+                                           (string-append
+                                            util-linux
+                                            "/etc/bash_completion.d"))))
+                        (with-directory-excursion completions
+                          (for-each (lambda (file)
+                                      (when (file-exists? file)
+                                        (delete-file file)))
+                                    (map basename already)))
+                        #t)))
+                  (add-before 'configure 'autoconf
+                    (lambda _
+                      (zero? (system* "autoreconf" "-vfi")))))))
     (synopsis "Bash completions for common commands")
     (description
      "This package provides extensions that allow Bash to provide adapted
