@@ -28,6 +28,7 @@
   #:use-module (gnu packages admin)
   #:use-module (gnu packages enlightenment)
   #:use-module (gnu packages glib)
+  #:use-module (gnu packages gtk)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages polkit)
@@ -36,7 +37,8 @@
   #:use-module (gnu packages readline)
   #:use-module (gnu packages samba)
   #:use-module (gnu packages tls)
-  #:use-module (gnu packages vpn))
+  #:use-module (gnu packages vpn)
+  #:use-module (gnu packages xml))
 
 (define-public connman
   (package
@@ -171,3 +173,31 @@ sharing) to clients via USB, ethernet, WiFi, cellular and Bluetooth.")
      "Cmst is a Qt based frontend for the @code{connman} connection manager.
 This package also provides a systemtray icon.")
     (license x11)))
+
+(define-public connman-gtk
+  (package
+    (name "connman-gtk")
+    (version "1.1.1")
+    (source
+      (origin
+        (method url-fetch)
+        (uri (string-append
+              "https://github.com/jgke/connman-gtk/releases/download/v" version "/connman-gtk-" version ".tar.bz2"))
+    (sha256
+     (base32
+      "1jlghbdyijm093p9zhpmlhgdzjdf47pmww74600qnl3wk9vc9ga9"))))
+    (build-system gnu-build-system)
+    (native-inputs
+     `(("pkg-config", pkg-config)))
+    (inputs
+     `(("dbus" ,dbus)
+       ("intltool" ,intltool)
+       ("glib-bin" ,glib "bin")
+       ("gnutls" ,gnutls)
+       ("gtk+" ,gtk+)
+       ("libxml2" ,libxml2)
+       ("openconnect" ,openconnect)))
+    (home-page "https://github.com/jgke/connman-gtk")
+    (synopsis "GTK frontend for Connman")
+    (description "Full featured GTK frontend controlling Connman.")
+    (license gpl2)))
