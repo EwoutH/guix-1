@@ -141,6 +141,7 @@ keys, no previous conversation is compromised.")
               ("libotr" ,libotr)
               ("gnutls" ,gnutls)
               ("python" ,python-2)
+              ("pidgin" ,pidgin)
               ("perl" ,perl)))
     (arguments
      `(#:phases (alist-cons-after
@@ -155,7 +156,8 @@ keys, no previous conversation is compromised.")
                     (zero? (system* "./configure"
                                     (string-append "--prefix="
                                                    (assoc-ref outputs "out"))
-                                    "--otr=1")))
+                                    "--otr=1" "--purple=1" "--jabber=1"
+                                    "--msn=1" "--oscar=1" "--twitter=1")))
                   %standard-phases))))
     (synopsis "IRC to instant messaging gateway")
     (description "BitlBee brings IM (instant messaging) to IRC clients, for
