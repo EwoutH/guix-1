@@ -38,8 +38,11 @@
   #:use-module (gnu packages documentation)
   #:use-module (gnu packages docbook)
   #:use-module (gnu packages flex)
+  #:use-module (gnu packages gcc)
   #:use-module (gnu packages glib)
+  #:use-module (gnu packages kerberos)
   #:use-module (gnu packages linux)
+  #:use-module (gnu packages nfs)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
   #:use-module (gnu packages readline)
@@ -243,4 +246,40 @@ All of this is accomplished without a centralized metadata server.")
     (synopsis "Mount remote file systems over FTP")
     (description
      "This is a file system client based on the FTP File Transfer Protocol.")
+    (license license:gpl2+)))
+
+(define-public autofs
+  (package
+    (name "autofs")
+    (version "5.1.4")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append "https://cdn.kernel.org/pub/linux/daemons/" name
+                           "/v5/autofs-" version ".tar.xz"))
+       (sha256 (base32 "08hpphawzcdibwbhw0r3y7hnfczlazpp90sf3bz2imgza7p31klg"))))
+    (build-system gnu-build-system)
+    (arguments
+     `(#:configure-flags
+       (list (string-append "--with-path="
+                            (assoc-ref %build-inputs "gcc") "/bin:"
+                            (assoc-ref %build-inputs "flex") "/bin:"
+                            (assoc-ref %build-inputs "bison") "/bin:"
+                            (assoc-ref %build-inputs "e2fsprogs") "/bin:"
+                            (assoc-ref %build-inputs "mit-krb5") "/bin:"
+                            (assoc-ref %build-inputs "nfs-utils") "/bin")
+             (string-append "CPP=" (assoc-ref %build-inputs "gcc")
+                            "/bin/cpp"))))
+    (native-inputs
+     `(("flex" ,flex)
+       ("bison" ,bison)
+       ("gcc" ,gcc)))
+    (inputs
+     `(("e2fsprogs" ,e2fsprogs)
+       ("nfs-utils" ,nfs-utils)
+       ("libxml2" ,libxml2)
+       ("mit-krb5" ,mit-krb5)))
+    (home-page "https://cdn.kernel.org/pub/linux/daemons/autofs/")
+    (synopsis "Daemon mounting filesystems on demand")
+    (description "On demand mounting daemon using kernel automounter.  It is suitable for user access to USB drives, network homes etc.")
     (license license:gpl2+)))
