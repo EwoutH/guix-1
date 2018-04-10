@@ -13146,3 +13146,27 @@ in Python.  You can simply type pybtex instead of bibtex.")
     (synopsis "A high-level cross protocol url-grabber")
     (description "TBD")
     (license license:lgpl2.1)))
+
+(define-public python-m2crypto
+  (package
+    (name "python-m2crypto")
+    (version "0.29.0")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "M2Crypto" version))
+       (sha256
+        (base32
+         "1h16gpilrnlzc0iyj1mnd1iqh8wchzjsxjqw9n344glimg2s5zm0"))))
+    (build-system python-build-system)
+    (inputs
+     `(("openssl" ,openssl)))
+    (propagated-inputs
+     `(("python-typing" ,python-typing)))
+    (home-page "https://gitlab.com/m2crypto/m2crypto")
+    (synopsis "A Python crypto and SSL toolkit")
+    (description "TBD")
+    (license license:x11)))
+
+(define-public python2-m2crypto
+  (package-with-python2 python-m2crypto))
