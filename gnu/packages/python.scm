@@ -13127,3 +13127,22 @@ file system events on Linux.")
     (description "Pybtex is a BibTeX-compatible bibliography processor written
 in Python.  You can simply type pybtex instead of bibtex.")
     (license license:expat)))
+
+(define-public python2-urlgrabber
+  (package
+    (name "python2-urlgrabber")
+    (version "3.10.2")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri "urlgrabber" version))
+       (sha256
+        (base32
+         "0w1h7hlsq406bxfy2pn4i9bd003bwl0q9b7p03z3g6yl0d21ddq5"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:python ,python-2))
+    (home-page "http://urlgrabber.baseurl.org")
+    (synopsis "A high-level cross protocol url-grabber")
+    (description "TBD")
+    (license license:lgpl2.1)))
