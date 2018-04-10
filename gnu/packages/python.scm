@@ -13170,3 +13170,41 @@ in Python.  You can simply type pybtex instead of bibtex.")
 
 (define-public python2-m2crypto
   (package-with-python2 python-m2crypto))
+
+(define-public osc
+  (package
+    (name "osc")
+    (version "0.162.1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (string-append "https://github.com/openSUSE/" name "/archive/" version ".tar.gz"))
+       (file-name (string-append name "-" version ".tar.gz"))
+       (sha256
+        (base32
+         "0b4kpm96ns4smqyfjysbk2p78d36x44xprpna8zz85q1y5xn57aj"))))
+    (build-system python-build-system)
+    (arguments
+     `(#:python ,python-2
+       #:phases
+       (modify-phases %standard-phases
+         (add-after 'install 'fix-filename-and-remove-unused
+           (lambda* (#:key outputs #:allow-other-keys)
+             (let ((bin (string-append (assoc-ref outputs "out") "/bin/")))
+               ;; osc tool is renamed in spec file, not setup.py, let's do
+               ;; that too
+               (rename-file
+                (string-append bin "osc-wrapper.py")
+                (string-append bin "osc"))
+               ;; unused and broken script
+               (delete-file (string-append bin "osc_hotshot.py"))
+             #t))))))
+    (inputs
+     `(("python2-urlgrabber" ,python2-urlgrabber)
+       ("python2-pycurl" ,python2-pycurl)))
+    (propagated-inputs
+     `(("python2-m2crypto" ,python2-m2crypto)))
+    (home-page "https://github.com/openSUSE/osc")
+    (synopsis "Open Build Service command line tool")
+    (description "TBD")
+    (license license:gpl2+)))
