@@ -260,18 +260,33 @@ All of this is accomplished without a centralized metadata server.")
        (sha256 (base32 "08hpphawzcdibwbhw0r3y7hnfczlazpp90sf3bz2imgza7p31klg"))))
     (build-system gnu-build-system)
     (arguments
-     `(#:configure-flags
-       (list (string-append "--with-path="
-                            (assoc-ref %build-inputs "gcc") "/bin:"
-                            (assoc-ref %build-inputs "flex") "/bin:"
-                            (assoc-ref %build-inputs "bison") "/bin:"
-                            (assoc-ref %build-inputs "e2fsprogs") "/bin:"
-                            (assoc-ref %build-inputs "mit-krb5") "/bin:"
-                            (assoc-ref %build-inputs "nfs-utils") "/bin")
-             (string-append "CPP=" (assoc-ref %build-inputs "gcc")
-                            "/bin/cpp"))))
+     `(
+       ;; #:configure-flags
+       ;; (list (string-append "--with-path="
+       ;;                      (assoc-ref %build-inputs "gcc") "/bin:"
+       ;;                      (assoc-ref %build-inputs "flex") "/bin:"
+       ;;                      (assoc-ref %build-inputs "bison") "/bin:"
+       ;;                      (assoc-ref %build-inputs "e2fsprogs") "/bin:"
+       ;;                      (assoc-ref %build-inputs "mit-krb5") "/bin:"
+       ;;                      (assoc-ref %build-inputs "nfs-utils") "/bin")
+       ;;       (string-append "CPP=" (assoc-ref %build-inputs "gcc")
+       ;;                      "/bin/cpp"))
+       #:phases
+       (modify-phases %standard-phases
+         (add-after 'unpack 'substitute
+           (lambda _
+             (let ((pkgpath (string-append (assoc-ref %build-inputs "pkg-config") "/share/aclocal/pkg.m4")))
+               (substitute* "configure.in"
+                           (("/usr/share/aclocal/pkg.m4") pkgpath))
+               #t)))
+         (add-after 'substitute 'bootstrap
+           (lambda _
+             (zero? (system* "autoreconf" "-vif")))))))
     (native-inputs
-     `(("flex" ,flex)
+     `(("autoconf" ,autoconf)
+       ("automake" ,automake)
+       ("pkg-config" ,pkg-config)
+       ("flex" ,flex)
        ("bison" ,bison)
        ("gcc" ,gcc)))
     (inputs
