@@ -38,6 +38,7 @@
   #:use-module (gnu packages groff)
   #:use-module (gnu packages gsasl)
   #:use-module (gnu packages guile)
+  #:use-module (gnu packages kerberos)
   #:use-module (gnu packages libidn)
   #:use-module (gnu packages openldap)
   #:use-module (gnu packages perl)
@@ -62,9 +63,9 @@
    (outputs '("out"
               "doc"))                             ;1.2 MiB of man3 pages
    (inputs `(("gnutls" ,gnutls)
-             ("gss" ,gss)
              ("libidn" ,libidn)
              ("libssh2" ,libssh2)
+             ("mit-krb5" ,mit-krb5)
              ("openldap" ,openldap)
              ("zlib" ,zlib)))
    (native-inputs
@@ -83,7 +84,10 @@
            (separator #f)                         ;single entry
            (files '("etc/ssl/certs/ca-certificates.crt")))))
    (arguments
-    `(#:configure-flags '("--with-gnutls" "--with-gssapi")
+    `(#:configure-flags (list
+                         "--with-gnutls"
+                         (string-append "--with-gssapi="
+                                        (assoc-ref %build-inputs "mit-krb5")))
       ;; Add a phase to patch '/bin/sh' occurances in tests/runtests.pl
       #:phases
       (modify-phases %standard-phases
