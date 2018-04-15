@@ -160,3 +160,53 @@ created and all the services are started as specified in the configuration.")
       (description "Docker is tool-set for process containerization.  This
 package contains its daemon.")
       (license license:asl2.0))))
+
+(define-public docker-cli
+  (let ((commit "e5980c5"))
+    (package
+      (name "docker-cli")
+      (version "18.05.0-dev")
+      (home-page "https://www.docker.com/")
+      (source (origin
+                (method git-fetch)
+                (uri (git-reference
+                      (url "https://github.com/docker/cli.git")
+                      (commit commit)))
+                (file-name (string-append name "-" version "-" commit ".tar.gz"))
+                (sha256
+                 (base32
+                  "0dx3vqdas8f37nvww1hx8b0s5giy6bybzx8z9yfl7nl3pakxckka"))))
+      (inputs
+       `(("go" ,go)
+         ("go-github-com-miekg-pkcs11" ,go-github-com-miekg-pkcs11)))
+      (build-system gnu-build-system)
+      (arguments
+       `(#:tests? #f
+         #:phases
+         (modify-phases %standard-phases
+           (delete 'configure) ;; no configure
+           (replace 'build
+             (lambda* (#:key inputs outputs #:allow-other-keys)
+               (setenv "DOCKER_GITCOMMIT" ,commit) ; required by build
+               (setenv "AUTO_GOPATH" "1") ; FIXME: is this OK?
+               (setenv "DOCKER_MAKE_INSTALL_PREFIX" (assoc-ref outputs "out"))
+               (setenv "BUILDFLAGS" "-buildmode=pie")
+               (mkdir-p "src/github.com/docker")
+               (symlink (getcwd)
+                        (string-append
+                         (getcwd)
+                         "/src/github.com/docker/cli"))
+               (setenv "GOPATH" (getcwd))
+               (invoke "./scripts/build/dynbinary")
+               #t))
+           (replace 'install
+             (lambda* (#:key outputs #:allow-other-keys)
+               (let ((bin (string-append (assoc-ref outputs "out") "/bin")))
+                 (mkdir-p bin)
+                 (copy-file "build/docker-linux-amd64"
+                            (string-append bin "/docker"))
+                 #t))))))
+      (synopsis "Command line interface to Docker")
+      (description "Docker is tool-set for process containerization.  This
+package contains its command line interface.")
+      (license license:asl2.0))))
