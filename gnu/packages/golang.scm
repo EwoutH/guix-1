@@ -35,6 +35,7 @@
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system go)
   #:use-module (gnu packages admin)
+  #:use-module (gnu packages autotools)
   #:use-module (gnu packages gcc)
   #:use-module (gnu packages base)
   #:use-module (gnu packages perl)
@@ -1299,4 +1300,32 @@ limiting in Go.")
 support functions for dealing with terminals, as commonly found on UNIX
 systems.")
       (home-page "https://go.googlesource.com/crypto/")
+      (license license:bsd-3))))
+
+(define-public go-github-com-miekg-pkcs11
+  (let ((commit "05bded61edae2ff9358deca53276738020b926ea")
+        (revision "0"))
+    (package
+      (name "go-github-com-miekg-pkcs11")
+      (version (git-version "0.0.0" revision commit))
+      (source (origin
+                (method git-fetch)
+                (uri (git-reference
+                       (url "https://github.com/miekg/pkcs11")
+                       (commit commit)))
+                (file-name (git-file-name name version))
+                (sha256
+                  (base32
+                    "0xbb2n2dhi94ha176hq8d4w4ygp1p20n6qi1k2lxbq2xvndzf6py"))))
+      (build-system go-build-system)
+      (propagated-inputs
+       `(("libltdl" ,libltdl)))
+      (arguments
+       '(#:tests? #f
+         #:import-path "github.com/miekg/pkcs11"))
+      (synopsis "Go implementation of the PKCS#11")
+      (description "This is a Go implementation of the PKCS#11 API.  It wraps
+the library closely, but uses Go idiom where it makes sense.  It has been
+tested with SoftHSM.")
+      (home-page "https://github.com/miekg/pkcs11")
       (license license:bsd-3))))
