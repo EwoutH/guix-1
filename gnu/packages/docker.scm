@@ -23,7 +23,12 @@
   #:use-module (guix download)
   #:use-module (guix git-download)
   #:use-module (guix build-system python)
+  #:use-module (guix build-system gnu)
   #:use-module (guix utils)
+  #:use-module (gnu packages databases)
+  #:use-module (gnu packages golang)
+  #:use-module (gnu packages linux)
+  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
   #:use-module (gnu packages python-web))
 
@@ -103,3 +108,55 @@ multi-container Docker applications.  A Compose file is used to configure an
 application’s services.  Then, using a single command, the containers are
 created and all the services are started as specified in the configuration.")
     (license license:asl2.0)))
+
+(define-public docker
+  (let ((commit "3d479c0"))
+    (package
+      (name "docker")
+      (version "18.04.0-ce")
+      (home-page "https://www.docker.com/")
+      (source (origin
+                (method url-fetch)
+                (uri (string-append
+                      "https://github.com/docker/docker-ce/archive/v" version
+                      ".tar.gz"))
+                (file-name (string-append name "-" version ".tar.gz"))
+                (sha256
+                 (base32
+                  "0lz2zr2pqj4vhn3s2gwkncfyn3s9is1msprdwi8a9ynwjwm6zlbv"))))
+      (native-inputs `(("pkg-config" ,pkg-config)))
+      (inputs
+       `(("eudev" ,eudev)
+         ("go" ,go)
+         ("sqlite" ,sqlite)
+         ("lvm2" ,lvm2)
+         ("btrfs-progs" ,btrfs-progs)
+         ("libseccomp" ,libseccomp)))
+      (build-system gnu-build-system)
+      (arguments
+       `(#:tests? #f
+         #:strip-binaries? #f
+         #:phases
+         (modify-phases %standard-phases
+           (delete 'configure) ;; no configure
+           (replace 'build
+             (lambda* (#:key inputs outputs #:allow-other-keys)
+               (chdir "components/engine")
+               (setenv "DOCKER_GITCOMMIT" ,commit) ; required by build
+               (setenv "AUTO_GOPATH" "1") ; FIXME: is this OK?
+               (setenv "DOCKER_MAKE_INSTALL_PREFIX" (assoc-ref outputs "out"))
+               (setenv "BUILDFLAGS" "-buildmode=pie")
+               (setenv "BUILDTAGS" "seccomp pkcs11")
+               (invoke "bash" "hack/make.sh" "dynbinary")
+               #t))
+           (replace 'install
+             (lambda* (#:key outputs #:allow-other-keys)
+               (let ((bin (string-append (assoc-ref outputs "out") "/bin")))
+                 (mkdir-p bin)
+                 (copy-file "bundles/dynbinary-daemon/dockerd-dev"
+                            (string-append bin "/dockerd"))
+                 #t))))))
+      (synopsis "Docker is daemon controlling containers")
+      (description "Docker is tool-set for process containerization.  This
+package contains its daemon.")
+      (license license:asl2.0))))
