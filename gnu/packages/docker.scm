@@ -24,13 +24,16 @@
   #:use-module (guix git-download)
   #:use-module (guix build-system python)
   #:use-module (guix build-system gnu)
+  #:use-module (guix build-system go)
   #:use-module (guix utils)
+  #:use-module (gnu packages base)
   #:use-module (gnu packages databases)
   #:use-module (gnu packages golang)
   #:use-module (gnu packages linux)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages python)
-  #:use-module (gnu packages python-web))
+  #:use-module (gnu packages python-web)
+  #:use-module (gnu packages version-control))
 
 (define-public python-docker-py
   (package
@@ -210,3 +213,56 @@ package contains its daemon.")
       (description "Docker is tool-set for process containerization.  This
 package contains its command line interface.")
       (license license:asl2.0))))
+
+(define-public containerd
+  (package
+    (name "containerd")
+    (version "1.0.3")
+    (home-page "https://containerd.io/")
+    (source (origin
+              (method git-fetch)
+                (uri (git-reference
+                       (url "https://github.com/containerd/containerd")
+                       (commit (string-append "v" version))))
+                (file-name (git-file-name name version))
+                (sha256
+                  (base32
+                    "0k1zjn0mpd7q3p5srxld2fr4k6ijzbk0r34r6w69sh0d0rd2fvbs"))))
+    (inputs
+     `(("go" ,go)
+       ("btrfs-progs" ,btrfs-progs)))
+    (native-inputs
+     `(("make" ,gnu-make)))
+    (build-system go-build-system)
+    (arguments
+     `(#:import-path "github.com/containerd/containerd"
+       #:phases
+       (modify-phases %standard-phases
+         (replace 'build
+           (lambda* (#:key inputs outputs #:allow-other-keys)
+             (chdir "src/github.com/containerd/containerd")
+             (invoke "make" (string-append "GIT_COMMIT=v" ,version))
+             #t))
+         (replace 'install
+           (lambda* (#:key inputs outputs #:allow-other-keys)
+             (let ((out (string-append (assoc-ref outputs "out") "/")))
+               (mkdir-p (string-append out "bin"))
+               (for-each
+                (lambda (file)
+                  (let ((tgt (string-append out file)))
+                    (copy-file file tgt)))
+                '("bin/containerd"
+                  "bin/containerd-release"
+                  "bin/containerd-shim"
+                  "bin/containerd-stress"
+                  "bin/ctr"))
+               #t))))))
+      (synopsis "Standalone OCI Container Daemon")
+      (description "Containerd is an industry-standard container runtime with
+an emphasis on simplicity, robustness and portability.  It is available as a
+daemon for Linux and Windows, which can manage the complete container
+lifecycle of its host system: image transfer and storage, container execution
+and supervision, low-level storage and network attachments, etc.  containerd
+is designed to be embedded into a larger system, rather than being used
+directly by developers or end-users.")
+      (license license:asl2.0)))
