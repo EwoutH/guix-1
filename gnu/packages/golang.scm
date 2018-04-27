@@ -1329,3 +1329,29 @@ the library closely, but uses Go idiom where it makes sense.  It has been
 tested with SoftHSM.")
       (home-page "https://github.com/miekg/pkcs11")
       (license license:bsd-3))))
+
+(define-public go-github-com-sirupsen-logrus
+  (package
+    (name "go-github-com-sirupsen-logrus")
+    (version "1.0.5")
+    (source (origin
+              (method git-fetch)
+                (uri (git-reference
+                       (url "https://github.com/sirupsen/logrus")
+                       (commit (string-append "v" version))))
+                (file-name (git-file-name name version))
+                (sha256
+                  (base32
+                    "0g5z7al7kky11ai2dhac6gkp3b5pxsvx72yj3xg4wg3265gbn7yz"))))
+    (build-system go-build-system)
+    (inputs
+     `(("go-golang-org-x-sys-unix" ,go-golang-org-x-sys-unix)
+       ("ggo-golang-org-x-crypto-ssh-terminal" ,go-golang-org-x-crypto-ssh-terminal)))
+    (arguments
+     `(#:tests? #f ;; requires go-github-com-stretchr-testify-assert
+       #:import-path "github.com/sirupsen/logrus"))
+    (synopsis " Structured, pluggable logging for Go.")
+    (description "Logrus is a structured logger for Go having API completely
+compatible with the standard library logger.")
+    (home-page "https://github.com/sirupsen/logrus")
+    (license license:x11)))
