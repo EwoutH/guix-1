@@ -92,7 +92,7 @@ listing the files modified by a patch.")
 (define-public quilt
   (package
     (name "quilt")
-    (version "0.61")
+    (version "0.65")
     (source
      (origin
       (method url-fetch)
@@ -100,7 +100,7 @@ listing the files modified by a patch.")
                           name "-" version ".tar.gz"))
       (sha256
        (base32
-        "1hwz58djkq9cv46sjwxbp2v5m8yjr41kd0nm1zm1xm6418khmv0y"))))
+        "06b816m2gz9jfif7k9v2hrm7fz76zjg5pavf7hd3ifybwn4cgjzn"))))
     (build-system gnu-build-system)
     (inputs `(("perl" ,perl)
               ("less" ,less)
