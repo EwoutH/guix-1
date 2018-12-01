@@ -48,6 +48,7 @@
   #:use-module (gnu packages)
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages bash)
+  #:use-module (gnu packages boost)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages llvm)
   #:use-module (gnu packages golang)
@@ -2090,4 +2091,33 @@ Simplicity, portability, speed, and small footprint are all very important
 aspects of UnitTest++.  UnitTest++ is mostly standard C++ and makes minimal use
 of advanced library and language features, which means it should be easily
 portable to just about any platform.")
+    (license license:expat)))
+
+(define-public basexy
+  (package
+    (name "basexy")
+    (version "0.2")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "https://github.com/roman-neuhauser/basexy/archive/v"
+                    version ".tar.gz"))
+              (file-name (string-append name "-" version ".tar.gz"))
+              (sha256
+               (base32 "00hbdc8l2hfd7nm65193ksdrdzz58yk692rj0p8cscv6fcivap43"))))
+    ;; even though it is not GNU build system, it behaves well enough
+    (build-system gnu-build-system)
+    (inputs
+     `(("boost" ,boost)))
+    (native-inputs
+     `(("python-cram" ,python-cram)))
+    (arguments
+     ;; boost prefix is not found automatically
+     '(#:configure-flags (list (string-append "--with-boost="
+                                              (assoc-ref %build-inputs
+                                                         "boost")))))
+    (home-page "https://github.com/roman-neuhauser/basexy")
+    (synopsis "Commandline Tools, C++17 header-only library for Base64, Base32, Base16 and others")
+    (description "This is an implementation of all five Base XY encodings
+described in RFC 4648. It is MIT-licensed, and written in C++17.")
     (license license:expat)))
