@@ -2121,3 +2121,48 @@ portable to just about any platform.")
     (description "This is an implementation of all five Base XY encodings
 described in RFC 4648. It is MIT-licensed, and written in C++17.")
     (license license:expat)))
+
+(define-public fake
+  (package
+    (name "fake")
+    (version "0.3")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append
+                    "https://github.com/roman-neuhauser/fake/archive/v"
+                    version ".tar.gz"))
+              (file-name (string-append name "-" version ".tar.gz"))
+              (sha256
+               (base32 "1lsvf6qrccf1kzr9qh1scqz9rsg3fl3vn72rrhsa1ddsz50dvrcc"))
+              (patches (search-patches "fake-make-baseshell-configurable.patch"))
+))
+    (inputs
+     `(("basexy" ,basexy)))
+    (native-inputs
+     `(("python-cram" ,python-cram)
+       ("bash" ,bash)))
+    (arguments
+     `(#:tests? #t
+       #:configure-flags (list (string-append "--baseshell="
+                                              (assoc-ref %build-inputs
+                                                         "bash")
+                                              "/bin/sh"))
+       #:phases
+       (modify-phases %standard-phases
+         (add-after 'unpack 'fix-hashbangs
+           (lambda* (#:key inputs #:allow-other-keys)
+             (let* ((bash (assoc-ref inputs "bash"))
+                    (sh   (string-append "#!" bash "/bin/sh")))
+               (substitute*
+                   '("t/body-catchall.t" "t/body-clobber.t" "t/body-files.t"
+                     "t/body.t" "t/exitcode-files.t" "t/body-catchall-files.t"
+                     "t/path.t" "t/passthrough.t")
+                 (("#!/bin/sh") sh))
+               #t))))))
+    (build-system gnu-build-system)
+    (home-page "https://github.com/roman-neuhauser/fake")
+    (synopsis "Command mocking tool for command line")
+    (description "Fake provides interface to create mock of any command. It
+uses BINDIR environmental variable to introduce commands stubs and
+replacements.")
+    (license license:expat)))
